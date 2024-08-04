@@ -1,11 +1,14 @@
+import os
 import telebot
 import requests
+from flask import Flask, request
 from telebot import types
 from bs4 import BeautifulSoup
 import urllib3
-import os
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+app = Flask(__name__)
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -224,5 +227,17 @@ def default_reply(message):
     bot.reply_to(message, f"Sorry {message.chat.first_name}, the bot can only work with Indiabix URL.")
     print(f"Replied to message from {message.chat.first_name}")
 
-print("Bot started and awaiting messages...")
-bot.infinity_polling()
+# Define a route for the Flask app
+@app.route('/')
+def hello_world():
+    return 'Hello, World!'
+
+if __name__ == '__main__':
+    # Start the Flask app in a separate thread
+    from threading import Thread
+    flask_thread = Thread(target=lambda: app.run(host='0.0.0.0', port=5000))
+    flask_thread.start()
+    
+    # Start the bot
+    print("Bot started and awaiting messages...")
+    bot.infinity_polling()
