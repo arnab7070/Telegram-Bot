@@ -19,6 +19,7 @@ user_url_queue = {}
 class UserStates:
     AWAITING_URL = 1
     PROCESSING_SECTIONS = 2
+    AWAITING_SECTION_URL = 3
 
 def fetchData(soup):
     questionsList = []
@@ -219,12 +220,28 @@ def help_menu(message):
     help_text = ("/start - Show the welcome message\n"
                  "/demo - How the bot works\n"
                  "/sendurl - Send the URL to Scrape\n"
+                 "/sectionurl - Send a specific section URL to scrape\n"
                  "/help - Show this help menu")
     bot.send_message(message.chat.id, help_text)
 
+@bot.message_handler(commands=['sectionurl'])
+def request_section_url(message):
+    bot.reply_to(message, "Please send the specific section URL to process (e.g., https://www.indiabix.com/verbal-ability/antonyms/).")
+    user_states[message.chat.id] = UserStates.AWAITING_SECTION_URL
+
+@bot.message_handler(func=lambda msg: user_states.get(msg.chat.id) == UserStates.AWAITING_SECTION_URL and 'http' in msg.text)
+def process_section_url(message):
+    url = message.text
+    bot.send_message(message.chat.id, 'Please wait, your quiz questions are being processed...')
+    questionsList, optionList, answerList = mainFunction(url, bot, message.chat.id)
+    for index, (question, options) in enumerate(zip(questionsList, optionList), 1):
+        send_quiz(bot, message.chat.id, index, question, options, answerList[index-1])
+    bot.send_message(message.chat.id, f"Processed URL: {url}", parse_mode="Markdown")
+    user_states[message.chat.id] = UserStates.AWAITING_URL
+
 @bot.message_handler(func=lambda msg: True)
 def default_reply(message):
-    bot.reply_to(message, f"Sorry {message.chat.first_name}, the bot can only work with Indiabix URL.")
+    bot.reply_to(message, f"Sorry {message.chat.first_name}, the bot can only work with Indiabix URLs.")
     print(f"Replied to message from {message.chat.first_name}")
 
 # Define a route for the Flask app
