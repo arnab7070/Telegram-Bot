@@ -5,10 +5,21 @@ from flask import Flask, request
 from telebot import types
 from bs4 import BeautifulSoup
 import urllib3
+from flask_apscheduler import APScheduler
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+def background_task():
+    print("Running background task...")
+
+@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
+def job1():
+    background_task()
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)

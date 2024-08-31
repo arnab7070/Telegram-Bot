@@ -5,3 +5,4 @@ requests==2.28.1
 beautifulsoup4==4.11.1
 lxml==4.9.1
 urllib3==1.26.12
+Flask-APScheduler==1.13.1
