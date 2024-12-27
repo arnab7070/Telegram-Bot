@@ -230,7 +230,6 @@ def process_url(message):
 def help_menu(message):
     help_text = ("/start - Show the welcome message\n"
                  "/demo - How the bot works\n"
-                 "/sendurl - Send the URL to Scrape\n"
                  "/sectionurl - Send a specific section URL to scrape\n"
                  "/help - Show this help menu")
     bot.send_message(message.chat.id, help_text)
